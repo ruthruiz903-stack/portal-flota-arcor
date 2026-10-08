@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Flota de Vehículos — Arcor</title>
+    <!-- Fuente moderna Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --primary-hover: #002244;
+            --accent-blue: #0284c7;
+            --accent-gold: #f59e0b;
+            --bg-body: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-hover: 0 8px 20px rgba(0,0,0,0.12);
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* Header con Glassmorphism */
+        header {
+            background-color: rgba(0, 51, 102, 0.98);
+            backdrop-filter: blur(8px);
+            color: white;
+            padding: 0.9rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-container h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .logo-container span {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        nav {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        nav button {
+            background: transparent;
+            border: none;
+            color: #cbd5e1;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        nav button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        nav button.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+            box-shadow: inset 0 -2px 0 var(--accent-gold);
+        }
+
+        /* Hero Banner */
+        .hero {
+            background: linear-gradient(135deg, #002244 0%, #004080 50%, #0284c7 100%);
+            color: white;
+            text-align: center;
+            padding: 3.2rem 1.5rem;
+        }
+
+        .hero h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.6rem;
+        }
+
+        .hero p {
+            font-size: 1.05rem;
+            color: #e2e8f0;
+            max-width: 650px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+
+        /* Contenedor Principal */
+        .container {
+            max-width: 1020px;
+            margin: 2.5rem auto;
+            padding: 0 1.2rem;
+        }
+
+        /* Tarjetas de Solapa */
+        .tab-content {
+            display: none;
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-content h2 {
+            color: var(--primary-blue);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .tab-description {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Selector de Tipo de Vehículo */
+        .vehicle-type-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .type-card {
+            background-color: #f8fafc;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .type-card:hover {
+            border-color: var(--accent-blue);
+            background-color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .type-card.selected {
+            border-color: var(--primary-blue);
+            background-color: #f0f7ff;
+            box-shadow: 0 0 0 1px var(--primary-blue);
+        }
+
+        .type-card h3 {
+            color: var(--primary-blue);
+            font-size: 1.1rem;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .type-card p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+
+        /* Bloques de Contenido Informativo */
+        .info-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-top: 1.2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .callout {
+            padding: 1.2rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 1.2rem;
+            font-size: 0.92rem;
+        }
+
+        .callout-blue {
+            background-color: #f0f9ff;
+            border-left: 4px solid var(--accent-blue);
+            color: #0369a1;
+        }
+
+        .callout-amber {
+            background-color: #fffbebfb;
+            border-left: 4px solid var(--accent-gold);
+            color: #b45309;
+        }
+
+        .callout-red {
+            background-color: #fff1f2;
+            border-left: 4px solid #f43f5e;
+            color: #be123c;
+        }
+
+        .callout-navy {
+            background-color: #f1f5f9;
+            border-left: 4px solid var(--primary-blue);
+            color: #1e293b;
+        }
+
+        /* Botones Principales */
+        .link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            background-color: var(--primary-blue);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.4rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .link-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Formularios */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            font-size: 0.88rem;
+            color: var(--text-main);
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 0.9rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.92rem;
+            background-color: #f8fafc;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 0.85rem 1.6rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+            box-shadow: var(--shadow-md);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            background-color: #001e3d;
+            color: #64748b;
+            margin-top: 4rem;
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        footer strong {
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header con Menú -->
+    <header>
+        <div class="logo-container">
+            <h1>Flota de Vehículos</h1>
+            <span>Portal de Administración — Arcor</span>
+        </div>
+        <nav>
+            <button class="nav-btn active" onclick="openTab(event, 'siniestros')"><i class="fa-solid fa-triangle-exclamation"></i> Siniestros</button>
+            <button class="nav-btn" onclick="openTab(event, 'mantenimientos')"><i class="fa-solid fa-wrench"></i> Mantenimientos</button>
+            <button class="nav-btn" onclick="openTab(event, 'vtv')"><i class="fa-solid fa-file-circle-check"></i> VTV</button>
+            <button class="nav-btn" onclick="openTab(event, 'gastos')"><i class="fa-solid fa-credit-card"></i> Gastos Permitidos</button>
+            <button class="nav-btn" onclick="openTab(event, 'vacaciones')"><i class="fa-solid fa-umbrella-beach"></i> Vacaciones / Personal</button>
+            <button class="nav-btn" onclick="openTab(event, 'multas')"><i class="fa-solid fa-receipt"></i> Multas</button>
+        </nav>
+    </header>
+
+    <!-- Banner Principal -->
+    <section class="hero">
+        <h2>Administración de Flota Comercial</h2>
+        <p>Información, normativas y consultas frecuentes para el uso de unidades.</p>
+    </section>
+
+    <div class="container">
+
+        <!-- SECCIÓN 1: SINIESTROS -->
+        <section id="siniestros" class="tab-content active">
+            <h2><i class="fa-solid fa-triangle-exclamation" style="color: #e11d48;"></i> Registro de Siniestros</h2>
+            <p class="tab-description">Por favor, seleccione el tipo de unidad para consultar el procedimiento o realizar la denuncia:</p>
+
+            <div class="vehicle-type-selector">
+                <div class="type-card" id="btn-propia" onclick="selectSiniestroType('propia')">
+                    <h3><i class="fa-solid fa-car"></i> Flota Propia</h3>
+                    <p>Vehículos pertenecientes al parque automotor interno de Arcor.</p>
+                </div>
+                <div class="type-card" id="btn-kinto" onclick="selectSiniestroType('kinto')">
+                    <h3><i class="fa-solid fa-key"></i> Vehículo Kinto</h3>
+                    <p>Unidades bajo la modalidad de alquiler / renting Kinto.</p>
+                </div>
+            </div>
+
+            <!-- Flota Propia Siniestros -->
+            <div id="form-flota-propia" style="display: none;">
+                <div class="info-card">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1rem;">Siniestros Flota Propia — Procedimiento de Denuncia</h3>
+
+                    <div class="callout callout-navy">
+                        <h4 style="color: var(--primary-blue); margin-bottom: 0.4rem;"><i class="fa-solid fa-phone"></i> 1. Realizar la denuncia telefónica:</h4>
+                        <p>El conductor debe llamar inmediatamente a <strong>Sancor Seguros</strong> para efectuar la denuncia:</p>
+                        <p style="font-size: 1.1rem; font-weight: 700; color: var(--primary-blue); margin-top: 0.4rem;">
+                            📞 <a href="tel:08007774643" style="color: var(--primary-blue); text-decoration: none;">0800-777-4643</a>
+                        </p>
+                    </div>
+
+                    <div class="callout callout-blue">
+                        <h4 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-envelope"></i> 2. Informar por correo electrónico:</h4>
+                        <p style="margin-bottom: 0.6rem;">
+                            Una vez obtenida la denuncia, el conductor debe enviar un e-mail informando el <strong>número de siniestro</strong>, el <strong>detalle de lo ocurrido</strong> y adjuntando las <strong>fotos del vehículo</strong>.
+                        </p>
+                        <div style="background-color: #ffffff; padding: 0.9rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                            <p><strong>Destinatario principal:</strong> <a href="mailto:afrivero@sancorseguros.com" style="color: var(--accent-blue);">afrivero@sancorseguros.com</a> (Federico Rivero)</p>
+                            <p style="margin-top: 0.4rem;"><strong>Con copia obligatoria (CC):</strong> Fátima Figueroa (<a href="mailto:fatfiguero@arcor.com">fatfiguero@arcor.com</a>) y Administrador de Flota.</p>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 1.8rem; margin-bottom: 1rem; color: var(--primary-blue);">Registro Interno en Sistema</h3>
+                    <form action="#" method="POST">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="patente-sin">Patente / Dominio:</label>
+                                <input type="text" id="patente-sin" placeholder="Ej: AB123CD" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="conductor">Conductor Asignado:</label>
+                                <input type="text" id="conductor" placeholder="Nombre completo" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="nro-siniestro-propia">N° de Siniestro (Sancor):</label>
+                                <input type="text" id="nro-siniestro-propia" placeholder="Ej: 12345678" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="fecha-sin">Fecha del Siniestro:</label>
+                                <input type="date" id="fecha-sin" required>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="detalle-sin">Detalle del Accidente y Lugar:</label>
+                                <textarea id="detalle-sin" rows="3" placeholder="Describa brevemente lo ocurrido y la ubicación exacta..."></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-submit">Guardar Registro de Flota Propia</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Siniestros Kinto -->
+            <div id="info-kinto" style="display: none;">
+                <div class="info-card">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1rem;">Siniestros Kinto — Recomendaciones e Instrucciones</h3>
+
+                    <div class="callout callout-amber">
+                        <strong><i class="fa-solid fa-circle-info"></i> Pasos clave a tener en cuenta ante el incidente:</strong>
+                        <ul style="margin-left: 1.2rem; margin-top: 0.5rem; color: #475569;">
+                            <li><strong>Tomar fotografías:</strong> Sacar fotos del lugar del hecho, posición de los vehículos y daños visibles.</li>
+                            <li><strong>Si hubo involucrado un tercero:</strong> Foto de DNI del conductor, Cédula del vehículo y Comprobante de seguro vigente.</li>
+                            <li><strong>Datos de contacto:</strong> Intercambiar números de teléfono de los involucrados.</li>
+                        </ul>
+                    </div>
+
+                    <div class="callout callout-navy">
+                        <h4 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-headset"></i> Asistencia al Vehículo y Personas (24 hs):</h4>
+                        <p><strong>La Segunda Seguros:</strong></p>
+                        <ul style="list-style: none; padding-left: 0; color: #334155; margin-top: 0.3rem;">
+                            <li>📞 <strong>0800:</strong> 0-800-888-0001 / 0-800-888-8003 / 0-800-888-8004[cite: 2]</li>
+                            <li>💬 <strong>WhatsApp:</strong> 3416491199[cite: 2]</li>
+                        </ul>
+                        <hr style="margin: 0.8rem 0; border: 0; border-top: 1px solid var(--border-color);">
+                        <p><strong>Atención Kinto:</strong> 📞 0800-777-6624</p>
+                    </div>
+
+                    <div style="text-align: center; background-color: #f8fafc; padding: 1.5rem; border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+                        <p style="margin-bottom: 0.8rem; font-weight: 500;">1. Completá la declaración en el formulario oficial:</p>
+                        <a href="https://forms.office.com/r/4euPF92KXg" target="_blank" class="link-btn">
+                            <i class="fa-solid fa-file-pen"></i> Abrir Formulario Siniestros Kinto
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: MANTENIMIENTOS -->
+        <section id="mantenimientos" class="tab-content">
+            <h2><i class="fa-solid fa-wrench" style="color: var(--primary-blue);"></i> Mantenimiento Preventivo y Correctivo</h2>
+            <p class="tab-description">Por favor, seleccione el tipo de flota para ver los requisitos y coordinar el mantenimiento:</p>
+
+            <div class="vehicle-type-selector">
+                <div class="type-card" id="btn-mant-kinto" onclick="selectMantType('kinto')">
+                    <h3><i class="fa-solid fa-key"></i> Flota Kinto</h3>
+                    <p>Mantenimientos preventivos y red oficial Toyota.</p>
+                </div>
+                <div class="type-card" id="btn-mant-propia" onclick="selectMantType('propia')">
+                    <h3><i class="fa-solid fa-car"></i> Flota Propia</h3>
+                    <p>Mantenimientos de flota Arcor y red Bosch.</p>
+                </div>
+            </div>
+
+            <!-- Flota Kinto Mantenimiento -->
+            <div id="mant-kinto-box" style="display: none;">
+                <div class="info-card">
+                    <h3 style="color: var(--primary-blue);">Mantenimientos — Flota Kinto</h3>
+                    
+                    <div class="callout callout-blue">
+                        <p>⚠️ <strong>Frecuencia Obligatoria:</strong> Los mantenimientos preventivos deberán realizarse de manera obligatoria cada <strong>10.000 KM</strong>.</p>
+                    </div>
+
+                    <div style="margin-bottom: 1.2rem;">
+                        <h4 style="margin-bottom: 0.4rem;">📍 1. Coordinación de Turno en Concesionario Oficial Toyota:</h4>
+                        <a href="https://www.toyota.com.ar/concesionarios" target="_blank" class="link-btn">
+                            <i class="fa-solid fa-location-dot"></i> Buscar Concesionarios Oficiales Toyota
+                        </a>
+                    </div>
+
+                    <div>
+                        <h4 style="margin-bottom: 0.4rem;">📄 2. Envío de Orden de Servicio y Comprobantes:</h4>
+                        <a href="#" class="link-btn" style="background-color: var(--primary-blue);">
+                            <i class="fa-solid fa-receipt"></i> Rellenar Formulario Services - Comprobantes
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flota Propia Mantenimiento -->
+            <div id="mant-propia-box" style="display: none;">
+                <div class="info-card">
+                    <h3 style="color: var(--primary-blue);">Mantenimientos — Flota Propia Arcor</h3>
+
+                    <div class="callout callout-navy">
+                        <p>⚠️ <strong>Frecuencia Obligatoria:</strong> El mantenimiento de vehículos de flota Arcor deberá realizarse cada <strong>10.000 KM</strong>.</p>
+                    </div>
+
+                    <div>
+                        <h4 style="margin-bottom: 0.4rem;">🔧 Coordinación de Turno (Red Bosch):</h4>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.8rem;">Coordinar con el responsable de flota o completar el formulario:</p>
+                        <a href="https://forms.cloud.microsoft/r/2n2Ah4AWci" target="_blank" class="link-btn">
+                            <i class="fa-solid fa-clipboard-list"></i> Rellenar Formulario Relevamiento - Flota Propia
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Otros Casos -->
+            <div class="info-card" style="margin-top: 1.8rem;">
+                <h3 style="color: var(--primary-blue); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;">📌 Otros Casos de Mantenimiento e Imprevistos</h3>
+
+                <div class="callout callout-amber">
+                    <h4>🛞 Neumáticos:</h4>
+                    <ul style="margin-left: 1.2rem; margin-top: 0.4rem; color: #334155;">
+                        <li><strong>Reparaciones menores:</strong> Realizar en gomería, abonar y rendir como gasto de conservación.</li>
+                        <li><strong>Cambio de neumáticos:</strong> Coordinar previamente con el administrador un turno en talleres <strong>Bosch</strong>.</li>
+                    </ul>
+                </div>
+
+                <div class="callout callout-red">
+                    <h4>🔋 Inconvenientes con la Batería:</h4>
+                    <p style="margin-top: 0.4rem;"><strong>Flota Kinto:</strong> Concurrir a taller oficial Toyota. Asistencia Kinto: 0800-666-6624 / La Segunda: 0800-888-0001[cite: 2].</p>
+                    <p style="margin-top: 0.4rem;"><strong>Flota Arcor (Propia):</strong> Coordinar con el administrador. Asistencia Sancor: 0800-777-4643.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: VTV -->
+        <section id="vtv" class="tab-content">
+            <h2><i class="fa-solid fa-file-circle-check" style="color: var(--accent-blue);"></i> Verificación Técnica Vehicular (VTV / RTO)</h2>
+            <p class="tab-description">Por favor, seleccione la modalidad de flota de su vehículo para consultar los requisitos:</p>
+
+            <div class="vehicle-type-selector">
+                <div class="type-card" id="btn-vtv-propia" onclick="selectVtvType('propia')">
+                    <h3><i class="fa-solid fa-car"></i> Flota Arcor (Propia)</h3>
+                    <p>Revisión Técnica Obligatoria (RTO Nacional).</p>
+                </div>
+                <div class="type-card" id="btn-vtv-kinto" onclick="selectVtvType('kinto')">
+                    <h3><i class="fa-solid fa-key"></i> Flota Kinto</h3>
+                    <p>Vehículos radicados en CABA y gestión de turnos.</p>
+                </div>
+            </div>
+
+            <div id="vtv-propia-box" style="display: none;">
+                <div class="info-card">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 0.8rem;">VTV / RTO — Flota Arcor (Propia)</h3>
+                    <div class="callout callout-navy">
+                        <p>Coordinar el turno para <strong>RTO Nacional</strong> en un centro habilitado y luego enviar la foto del informe al administrador de flota.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vtv-kinto-box" style="display: none;">
+                <div class="info-card">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 0.8rem;">VTV — Flota Kinto</h3>
+
+                    <div class="callout callout-blue">
+                        <p>ℹ️ <strong>Radicación en CABA:</strong> La primera VTV debe realizarse a los <strong>5 años de radicación</strong> del vehículo.</p>
+                    </div>
+
+                    <div style="margin-bottom: 1.2rem;">
+                        <h4 style="margin-bottom: 0.4rem;">📅 Solicitud de Turno VTV:</h4>
+                        <a href="https://forms.cloud.microsoft/r/c7HGh2rk2F" target="_blank" class="link-btn">
+                            <i class="fa-solid fa-calendar-check"></i> Turno VTV: Rellenar formulario
+                        </a>
+                    </div>
+
+                    <div class="callout callout-amber">
+                        <h4 style="margin-bottom: 0.4rem;">📑 Normativa Vigente:</h4>
+                        <a href="file:///C:/Users/reruiz/Downloads/NUEVA%20Ley%20VTV%20CABA%202026%20(1).pdf" target="_blank" class="link-btn" style="background-color: var(--accent-gold); color: #1e293b;">
+                            <i class="fa-solid fa-file-pdf"></i> Descargar Ley VTV CABA 2026
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 4: GASTOS PERMITIDOS -->
+        <section id="gastos" class="tab-content">
+            <h2><i class="fa-solid fa-credit-card" style="color: var(--primary-blue);"></i> Gastos Permitidos</h2>
+            <p class="tab-description">Consulte las políticas operativas de gastos autorizados y las condiciones de uso de la tarjeta YPF en Ruta.</p>
+
+            <div class="callout callout-blue">
+                <strong>📌 Política Operativa de Gastos Autorizados:</strong>
+                <ul style="margin-left: 1.2rem; margin-top: 0.4rem;">
+                    <li><strong>Combustible:</strong> Estaciones de red corporativa autorizadas.</li>
+                    <li><strong>Peajes:</strong> Dispositivo de Telepase corporativo.</li>
+                    <li><strong>Lavaduría:</strong> Hasta 2 lavados mensuales con comprobante A o B.</li>
+                    <li><strong>Urgencias en ruta:</strong> Cambios de lámparas/pinchaduras (requiere factura).</li>
+                </ul>
+            </div>
+
+            <div class="info-card">
+                <h3 style="color: var(--accent-blue); margin-bottom: 0.8rem;"><i class="fa-solid fa-gas-pump"></i> YPF en Ruta — Carga de Combustible</h3>
+                
+                <p style="margin-bottom: 0.8rem; color: #334155;">
+                    Usted deberá contar con la <strong>tarjeta YPF en Ruta</strong> (asociada al dominio) y un <strong>PIN intransferible</strong> asignado a su DNI.
+                </p>
+
+                <div class="callout callout-navy" style="margin-bottom: 0.8rem;">
+                    <strong>💡 Aclaración Importante sobre el PIN:</strong>
+                    <p style="margin-top: 0.2rem;">En caso de cambio de vehículo, cambiará la tarjeta física pero <strong>no cambiará su número de PIN</strong>.</p>
+                </div>
+
+                <div class="callout callout-amber">
+                    <strong>🗓️ Restricción de Días de Carga:</strong>
+                    <p style="margin-top: 0.2rem;"><strong>Sólo se debe cargar combustible en días de semana</strong>. Consumos en fines de semana o vacaciones corresponden al conductor.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 5: USO VACACIONES / PERSONAL -->
+        <section id="vacaciones" class="tab-content">
+            <h2><i class="fa-solid fa-umbrella-beach" style="color: var(--accent-gold);"></i> Uso del Vehículo en Vacaciones / Fines Turísticos</h2>
+            <p class="tab-description">Requisitos corporativos, autorizaciones y responsabilidades para la utilización personal de la unidad.</p>
+
+            <div class="callout callout-navy">
+                <h4>📜 Autorizaciones Requeridas:</h4>
+                <ul style="margin-left: 1.2rem; margin-top: 0.4rem; color: #334155;">
+                    <li><strong>Uso Nacional:</strong> Autorización expresa del <strong>Gerente Regional</strong> o <strong>Gerente de TMKT</strong>.</li>
+                    <li><strong>Viajes al Exterior:</strong> Autorización del <strong>Gerente de Canal</strong> o <strong>Gerente de Trade Marketing</strong>.</li>
+                </ul>
+            </div>
+
+            <div class="callout callout-amber">
+                <h4>⏳ Tiempos de Tramitación (Trámite con Legales):</h4>
+                <p style="margin-top: 0.3rem;">Tramitar con no menos de <strong>20 días de anticipación</strong> (mayor plazo para unidades Kinto de Toyota).</p>
+            </div>
+
+            <div class="info-card" style="margin-bottom: 1.2rem;">
+                <h4 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-camera"></i> Registro y Estado del Vehículo (Salida y Regreso):</h4>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.8rem;">Enviar fotos del exterior (frente, laterales, trasera) y odómetro al salir y regresar.</p>
+                <a href="https://forms.cloud.microsoft/r/hTyzA9684U" target="_blank" class="link-btn">
+                    <i class="fa-solid fa-car-rear"></i> Declaración de Estado de Vehículo - Arcor
+                </a>
+            </div>
+
+            <div class="callout callout-blue">
+                <h4>📋 Documentación y Responsabilidad de Gastos:</h4>
+                <ul style="margin-left: 1.2rem; margin-top: 0.4rem; color: #334155;">
+                    <li><strong>Documentación en regla:</strong> Cédula, VTV, seguro obligatorio y Mercosur vigente.</li>
+                    <li><strong>Gastos a cargo del colaborador:</strong> Combustible, peajes, estacionamiento y lavados.</li>
+                    <li><strong>Imprevistos:</strong> Notificar de inmediato al reincorporarse.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 6: MULTAS -->
+        <section id="multas" class="tab-content">
+            <h2><i class="fa-solid fa-receipt" style="color: #e11d48;"></i> Gestión de Infracciones y Multas</h2>
+            <p class="tab-description">Lineamientos corporativos sobre la recepción, verificación y pago de multas de tránsito.</p>
+
+            <div class="callout callout-red">
+                <h4>💳 Responsabilidad de Pago:</h4>
+                <p style="margin-top: 0.3rem;">El pago de cada multa estará a cargo exclusivo de <strong>cada colaborador asignado al vehículo</strong>.</p>
+            </div>
+
+            <div class="callout callout-navy">
+                <h4>📩 Notificación de Infracciones:</h4>
+                <p style="margin-top: 0.3rem;">El área de Multas enviará por e-mail el detalle de cada infracción recibida con las opciones de pago.</p>
+            </div>
+
+            <div class="callout callout-blue">
+                <h4>🔍 Recomendación Preventiva:</h4>
+                <p style="margin-top: 0.3rem;">Sugerimos revisar las páginas oficiales de infracciones por dominio para aprovechar descuentos de pago voluntario.</p>
+            </div>
+
+            <div class="info-card">
+                <h4>📧 Contacto del Área de Multas:</h4>
+                <p style="margin-top: 0.3rem; color: var(--text-muted);">Ante dudas o comprobantes: <a href="mailto:multas@arcor.com" style="color: var(--accent-blue); font-weight: 600; text-decoration: none;">multas@arcor.com</a></p>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Arcor S.A.I.C. — <strong>Área de Administración de Flotas Corporativas</strong></p>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, navbtns;
+
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+
+            navbtns = document.getElementsByClassName("nav-btn");
+            for (i = 0; i < navbtns.length; i++) {
+                navbtns[i].classList.remove("active");
+            }
+
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // Selección tipo vehículo Siniestros
+        function selectSiniestroType(type) {
+            var btnPropia = document.getElementById('btn-propia');
+            var btnKinto = document.getElementById('btn-kinto');
+            var formPropia = document.getElementById('form-flota-propia');
+            var infoKinto = document.getElementById('info-kinto');
+
+            btnPropia.classList.remove('selected');
+            btnKinto.classList.remove('selected');
+
+            if (type === 'propia') {
+                btnPropia.classList.add('selected');
+                formPropia.style.display = 'block';
+                infoKinto.style.display = 'none';
+            } else if (type === 'kinto') {
+                btnKinto.classList.add('selected');
+                formPropia.style.display = 'none';
+                infoKinto.style.display = 'block';
+            }
+        }
+
+        // Selección tipo vehículo Mantenimiento
+        function selectMantType(type) {
+            var btnKinto = document.getElementById('btn-mant-kinto');
+            var btnPropia = document.getElementById('btn-mant-propia');
+            var mantKinto = document.getElementById('mant-kinto-box');
+            var mantPropia = document.getElementById('mant-propia-box');
+
+            btnKinto.classList.remove('selected');
+            btnPropia.classList.remove('selected');
+
+            if (type === 'kinto') {
+                btnKinto.classList.add('selected');
+                mantKinto.style.display = 'block';
+                mantPropia.style.display = 'none';
+            } else if (type === 'propia') {
+                btnPropia.classList.add('selected');
+                mantKinto.style.display = 'none';
+                mantPropia.style.display = 'block';
+            }
+        }
+
+        // Selección tipo vehículo VTV
+        function selectVtvType(type) {
+            var btnPropia = document.getElementById('btn-vtv-propia');
+            var btnKinto = document.getElementById('btn-vtv-kinto');
+            var vtvPropia = document.getElementById('vtv-propia-box');
+            var vtvKinto = document.getElementById('vtv-kinto-box');
+
+            btnPropia.classList.remove('selected');
+            btnKinto.classList.remove('selected');
+
+            if (type === 'propia') {
+                btnPropia.classList.add('selected');
+                vtvPropia.style.display = 'block';
+                vtvKinto.style.display = 'none';
+            } else if (type === 'kinto') {
+                btnKinto.classList.add('selected');
+                vtvPropia.style.display = 'none';
+                vtvKinto.style.display = 'block';
+            }
+        }
+    </script>
+
+</body>
+</html>
